@@ -27,11 +27,10 @@ def main(fname):
     met = pd.read_csv(fname)
 
     # initialise structures
-    mp = GenericClass()
     p = GenericClass()
     c = GenericClass()
 
-    setup_initial_conditions(mp, p, c)
+    setup_initial_conditions(p, c)
 
     # Setup matrix holding ensemble members (A)
     A = np.zeros((c.ndims, c.nrens))
@@ -43,33 +42,37 @@ def main(fname):
     p_k = np.zeros(c.ndims)
 
     # Initialise the ensemble (A)
-    A = initialise_ensemble(mp, c, A)
+    A = initialise_ensemble(p, c, A)
 
     # Initial error covariance matrix Q matrix
     Q = initialise_error_covariance(c, Q)
 
+    # setup factor to ensure variance growth over time becomes independent of
+    # alpha and delta_timestep (as long as the dynamical model is linear).
     rho = setup_stochastic_model_error()
+
+    forecast(A, Q, p_k, c, p)
 
 class GenericClass:
     pass
 
-def setup_initial_conditions(mp, p, c):
+def setup_initial_conditions(p, c):
 
     # dalec model values
-    mp.t1 = 4.41E-06
-    mp.t2 = 0.473267
-    mp.t3 = 0.314951
-    mp.t4 = 0.434401
-    mp.t5 = 0.00266518
-    mp.t6 = 2.06E-06
-    mp.t7 = 2.48E-03
-    mp.t8 = 2.28E-02
-    mp.t9 = 2.65E-06
-    mp.cf0 = 57.7049
-    mp.cw0 = 769.863
-    mp.cr0 = 101.955
-    mp.cl0 = 40.4494
-    mp.cs0 = 9896.7
+    p.t1 = 4.41E-06
+    p.t2 = 0.473267
+    p.t3 = 0.314951
+    p.t4 = 0.434401
+    p.t5 = 0.00266518
+    p.t6 = 2.06E-06
+    p.t7 = 2.48E-03
+    p.t8 = 2.28E-02
+    p.t9 = 2.65E-06
+    p.cf0 = 57.7049
+    p.cw0 = 769.863
+    p.cr0 = 101.955
+    p.cl0 = 40.4494
+    p.cs0 = 9896.7
 
     # acm parameterisation
     p.a0 = 2.155;
@@ -85,9 +88,9 @@ def setup_initial_conditions(mp, p, c):
 
     # location - oregon
     p.lat = 44.4;
+    p.sla = 111.
 
     c.nrobs = 0
-    c.sla = 111.
     c.ndims = 16
     c.nrens = 200
     c.max_params = 15
@@ -110,7 +113,7 @@ def setup_initial_conditions(mp, p, c):
     c.POS_CS = 14
     c.POS_GPP = 15
 
-def initialise_ensemble(mp, c, A):
+def initialise_ensemble(p, c, A):
 
     for j in range(c.nrens):
         A[c.POS_RA,j] = 1.0 * np.random.normal(0.0, 0.1 * 1.0)
@@ -124,11 +127,11 @@ def initialise_ensemble(mp, c, A):
         A[c.POS_RH2,j] = 0.3 * np.random.normal(0.0, 0.1 * 0.3)
         A[c.POS_D,j] = 0.3 * np.random.normal(0.0, 0.1 * 0.3)
         A[c.POS_GPP,j] = 1.0 * np.random.normal(0.0, 0.1 * 1.0)
-        A[c.POS_CF,j] = mp.cf0 * np.random.normal(0.0, 0.1 * mp.cf0)
-        A[c.POS_CW,j] = mp.cw0 * np.random.normal(0.0, 0.1 * mp.cw0)
-        A[c.POS_CR,j] = mp.cr0 * np.random.normal(0.0, 0.1 * mp.cr0)
-        A[c.POS_CL,j] = mp.cl0 * np.random.normal(0.0, 0.1 * mp.cl0)
-        A[c.POS_CS,j] = mp.cs0 * np.random.normal(0.0, 0.1 * mp.cs0)
+        A[c.POS_CF,j] = p.cf0 * np.random.normal(0.0, 0.1 * p.cf0)
+        A[c.POS_CW,j] = p.cw0 * np.random.normal(0.0, 0.1 * p.cw0)
+        A[c.POS_CR,j] = p.cr0 * np.random.normal(0.0, 0.1 * p.cr0)
+        A[c.POS_CL,j] = p.cl0 * np.random.normal(0.0, 0.1 * p.cl0)
+        A[c.POS_CS,j] = p.cs0 * np.random.normal(0.0, 0.1 * p.cs0)
 
     return A
 
@@ -164,6 +167,23 @@ def setup_stochastic_model_error():
     rho = np.sqrt(1.0 / delta_t * num / den)
 
     return rho
+
+
+def forecast(A, Q, p_k, c, p):
+
+    A_tmp = np.zeros((c.ndims, c.nrens))
+    A_mean = np.zeros(c.ndims)
+
+    # generate model prediction
+    for j in range(c.nrens):
+        # To stop the possibility of having negative ensemble lais */
+        lai = np.maximum(0.1, A[c.POS_CF, j]  / p.sla)
+        #gpp = acm(lai, p)
+
+        print(lai)
+
+        sys.exit()
+
 
 if __name__ == "__main__":
 
