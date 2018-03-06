@@ -94,42 +94,42 @@ def setup_initial_conditions(mp, p, c):
     c.dump_gpp = False
     c.dump_nep = False;
 
-    c.SV_POS_RA = 0
-    c.SV_POS_AF = 1
-    c.SV_POS_AW = 2
-    c.SV_POS_AR = 3
-    c.SV_POS_LF = 4
-    c.SV_POS_LW = 5
-    c.SV_POS_LR = 6
-    c.SV_POS_CF = 7
-    c.SV_POS_CW = 8
-    c.SV_POS_CR = 9
-    c.SV_POS_RH1 = 10
-    c.SV_POS_RH2 = 11
-    c.SV_POS_D = 12
-    c.SV_POS_CL = 13
-    c.SV_POS_CS = 14
-    c.SV_POS_GPP = 15
+    c.POS_RA = 0
+    c.POS_AF = 1
+    c.POS_AW = 2
+    c.POS_AR = 3
+    c.POS_LF = 4
+    c.POS_LW = 5
+    c.POS_LR = 6
+    c.POS_CF = 7
+    c.POS_CW = 8
+    c.POS_CR = 9
+    c.POS_RH1 = 10
+    c.POS_RH2 = 11
+    c.POS_D = 12
+    c.POS_CL = 13
+    c.POS_CS = 14
+    c.POS_GPP = 15
 
 def initialise_ensemble(mp, c, A):
 
     for j in range(c.nrens):
-        A[c.SV_POS_RA, j] = 1.0 * np.random.normal(0.0, 0.1 * 1.0)
-        A[c.SV_POS_AF, j] = 0.3 * np.random.normal(0.0, 0.1 * 0.3)
-        A[c.SV_POS_AW, j] = 0.3 * np.random.normal(0.0, 0.1 * 0.3)
-        A[c.SV_POS_AR, j] = 0.3 * np.random.normal(0.0, 0.1 * 0.3)
-        A[c.SV_POS_LF, j] = 0.3 * np.random.normal(0.0, 0.1 * 0.3)
-        A[c.SV_POS_LW, j] = 0.3 * np.random.normal(0.0, 0.1 * 0.3)
-        A[c.SV_POS_LR, j] = 0.3 * np.random.normal(0.0, 0.1 * 0.3)
-        A[c.SV_POS_RH1, j] = 0.3 * np.random.normal(0.0, 0.1 * 0.3)
-        A[c.SV_POS_RH2, j] = 0.3 * np.random.normal(0.0, 0.1 * 0.3)
-        A[c.SV_POS_D, j] = 0.3 * np.random.normal(0.0, 0.1 * 0.3)
-        A[c.SV_POS_GPP, j] = 1.0 * np.random.normal(0.0, 0.1 * 1.0)
-        A[c.SV_POS_CF, j] = mp.cf0 * np.random.normal(0.0, 0.1 * mp.cf0)
-        A[c.SV_POS_CW, j] = mp.cw0 * np.random.normal(0.0, 0.1 * mp.cw0)
-        A[c.SV_POS_CR, j] = mp.cr0 * np.random.normal(0.0, 0.1 * mp.cr0)
-        A[c.SV_POS_CL, j] = mp.cl0 * np.random.normal(0.0, 0.1 * mp.cl0)
-        A[c.SV_POS_CS, j] = mp.cs0 * np.random.normal(0.0, 0.1 * mp.cs0)
+        A[c.POS_RA, j] = 1.0 * np.random.normal(0.0, 0.1 * 1.0)
+        A[c.POS_AF, j] = 0.3 * np.random.normal(0.0, 0.1 * 0.3)
+        A[c.POS_AW, j] = 0.3 * np.random.normal(0.0, 0.1 * 0.3)
+        A[c.POS_AR, j] = 0.3 * np.random.normal(0.0, 0.1 * 0.3)
+        A[c.POS_LF, j] = 0.3 * np.random.normal(0.0, 0.1 * 0.3)
+        A[c.POS_LW, j] = 0.3 * np.random.normal(0.0, 0.1 * 0.3)
+        A[c.POS_LR, j] = 0.3 * np.random.normal(0.0, 0.1 * 0.3)
+        A[c.POS_RH1, j] = 0.3 * np.random.normal(0.0, 0.1 * 0.3)
+        A[c.POS_RH2, j] = 0.3 * np.random.normal(0.0, 0.1 * 0.3)
+        A[c.POS_D, j] = 0.3 * np.random.normal(0.0, 0.1 * 0.3)
+        A[c.POS_GPP, j] = 1.0 * np.random.normal(0.0, 0.1 * 1.0)
+        A[c.POS_CF, j] = mp.cf0 * np.random.normal(0.0, 0.1 * mp.cf0)
+        A[c.POS_CW, j] = mp.cw0 * np.random.normal(0.0, 0.1 * mp.cw0)
+        A[c.POS_CR, j] = mp.cr0 * np.random.normal(0.0, 0.1 * mp.cr0)
+        A[c.POS_CL, j] = mp.cl0 * np.random.normal(0.0, 0.1 * mp.cl0)
+        A[c.POS_CS, j] = mp.cs0 * np.random.normal(0.0, 0.1 * mp.cs0)
 
     return A
 
