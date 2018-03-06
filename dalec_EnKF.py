@@ -22,7 +22,10 @@ __email__   = "mdekauwe@gmail.com"
 import numpy as np
 import sys
 
-def main():
+def main(fname):
+
+    df = pd.read_csv(fname)
+    print(df)
 
     # initialise structures
     mp = GenericClass()
@@ -44,7 +47,7 @@ def main():
     A = initialise_ensemble(mp, c, A)
 
     # Initial error covariance matrix Q matrix
-    Q = initialise_error_covariance(Q)
+    Q = initialise_error_covariance(c, Q)
 
 
 class GenericClass:
@@ -143,4 +146,5 @@ def initialise_error_covariance(c, Q):
 
 if __name__ == "__main__":
 
-    main()
+    fname = "data/dalec_drivers.OREGON.no_obs.csv"
+    main(fname)
