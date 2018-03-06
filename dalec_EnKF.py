@@ -24,8 +24,7 @@ import sys
 
 def main(fname):
 
-    df = pd.read_csv(fname)
-    print(df)
+    met = pd.read_csv(fname)
 
     # initialise structures
     mp = GenericClass()
