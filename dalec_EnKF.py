@@ -113,22 +113,22 @@ def setup_initial_conditions(mp, p, c):
 def initialise_ensemble(mp, c, A):
 
     for j in range(c.nrens):
-        A[c.POS_RA, j] = 1.0 * np.random.normal(0.0, 0.1 * 1.0)
-        A[c.POS_AF, j] = 0.3 * np.random.normal(0.0, 0.1 * 0.3)
-        A[c.POS_AW, j] = 0.3 * np.random.normal(0.0, 0.1 * 0.3)
-        A[c.POS_AR, j] = 0.3 * np.random.normal(0.0, 0.1 * 0.3)
-        A[c.POS_LF, j] = 0.3 * np.random.normal(0.0, 0.1 * 0.3)
-        A[c.POS_LW, j] = 0.3 * np.random.normal(0.0, 0.1 * 0.3)
-        A[c.POS_LR, j] = 0.3 * np.random.normal(0.0, 0.1 * 0.3)
-        A[c.POS_RH1, j] = 0.3 * np.random.normal(0.0, 0.1 * 0.3)
-        A[c.POS_RH2, j] = 0.3 * np.random.normal(0.0, 0.1 * 0.3)
-        A[c.POS_D, j] = 0.3 * np.random.normal(0.0, 0.1 * 0.3)
-        A[c.POS_GPP, j] = 1.0 * np.random.normal(0.0, 0.1 * 1.0)
-        A[c.POS_CF, j] = mp.cf0 * np.random.normal(0.0, 0.1 * mp.cf0)
-        A[c.POS_CW, j] = mp.cw0 * np.random.normal(0.0, 0.1 * mp.cw0)
-        A[c.POS_CR, j] = mp.cr0 * np.random.normal(0.0, 0.1 * mp.cr0)
-        A[c.POS_CL, j] = mp.cl0 * np.random.normal(0.0, 0.1 * mp.cl0)
-        A[c.POS_CS, j] = mp.cs0 * np.random.normal(0.0, 0.1 * mp.cs0)
+        A[c.POS_RA,j] = 1.0 * np.random.normal(0.0, 0.1 * 1.0)
+        A[c.POS_AF,j] = 0.3 * np.random.normal(0.0, 0.1 * 0.3)
+        A[c.POS_AW,j] = 0.3 * np.random.normal(0.0, 0.1 * 0.3)
+        A[c.POS_AR,j] = 0.3 * np.random.normal(0.0, 0.1 * 0.3)
+        A[c.POS_LF,j] = 0.3 * np.random.normal(0.0, 0.1 * 0.3)
+        A[c.POS_LW,j] = 0.3 * np.random.normal(0.0, 0.1 * 0.3)
+        A[c.POS_LR,j] = 0.3 * np.random.normal(0.0, 0.1 * 0.3)
+        A[c.POS_RH1,j] = 0.3 * np.random.normal(0.0, 0.1 * 0.3)
+        A[c.POS_RH2,j] = 0.3 * np.random.normal(0.0, 0.1 * 0.3)
+        A[c.POS_D,j] = 0.3 * np.random.normal(0.0, 0.1 * 0.3)
+        A[c.POS_GPP,j] = 1.0 * np.random.normal(0.0, 0.1 * 1.0)
+        A[c.POS_CF,j] = mp.cf0 * np.random.normal(0.0, 0.1 * mp.cf0)
+        A[c.POS_CW,j] = mp.cw0 * np.random.normal(0.0, 0.1 * mp.cw0)
+        A[c.POS_CR,j] = mp.cr0 * np.random.normal(0.0, 0.1 * mp.cr0)
+        A[c.POS_CL,j] = mp.cl0 * np.random.normal(0.0, 0.1 * mp.cl0)
+        A[c.POS_CS,j] = mp.cs0 * np.random.normal(0.0, 0.1 * mp.cs0)
 
     return A
 
