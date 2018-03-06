@@ -48,6 +48,7 @@ def main(fname):
     # Initial error covariance matrix Q matrix
     Q = initialise_error_covariance(c, Q)
 
+    rho = setup_stochastic_model_error()
 
 class GenericClass:
     pass
@@ -91,10 +92,6 @@ def setup_initial_conditions(mp, p, c):
     c.nrens = 200
     c.max_params = 15
     c.seed = 0
-    c.alpha = 0.0;
-    c.dump_rt = False
-    c.dump_gpp = False
-    c.dump_nep = False;
 
     c.POS_RA = 0
     c.POS_AF = 1
@@ -142,6 +139,31 @@ def initialise_error_covariance(c, Q):
             Q[i,j] = np.random.normal(0.0, 1.0)
 
     return Q
+
+def setup_stochastic_model_error():
+    """
+    Set up stochastic model error according to eqn 42 - Evenson, 2003. This
+    ensures that the variance growth over time becomes independent of alpha and
+    delta_t (as long as the dynamical model is linear).
+    """
+    # timestep
+    delta_t = 1.0
+
+    # specified time decorrelation length s.
+    tau = 1.0
+
+    # The factor a should be related to the time step used, eqn 32
+    # (i.e. this is zero)
+    alpha = 1.0 - (delta_t / tau)
+
+    # number of timesteps per time unit
+    n = 1.0
+
+    num = (1.0 - alpha)**2
+    den = n - 2.0 * alpha * n * alpha**2 + (2.0 * alpha)**(n + 1.0)
+    rho = np.sqrt(1.0 / delta_t * num / den)
+
+    return rho
 
 if __name__ == "__main__":
 
