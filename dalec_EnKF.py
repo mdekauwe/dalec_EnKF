@@ -168,10 +168,8 @@ def initialise_ensemble(p, c, A):
 
 def initialise_error_covariance(c, Q):
 
-    for i in range(c.ndims):
-        for j in range(c.nrens):
-            Q[i,j] = np.random.normal(0.0, 1.0)
-
+    Q = np.random.normal(0.0, 1.0, c.ndims*c.nrens).reshape(c.ndims, c.nrens)
+    
     return Q
 
 def setup_stochastic_model_error(p):
