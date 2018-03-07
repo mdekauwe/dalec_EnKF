@@ -33,17 +33,7 @@ def main(fname):
 
     setup_initial_conditions(p, c)
 
-    # Setup matrix holding ensemble members
-    A = np.zeros((c.ndims, c.nrens))
-
-    # Setup matrix holding innovations
-    D = np.zeros((c.nrobs, c.nrens))
-
-    # Setup ensemble covariance matrix of the errors (Q)
-    Q = np.zeros((c.ndims, c.nrens))
-
-    # model errors
-    p_k = np.zeros(c.ndims)
+    (A, D, S, E, Q, p_k) = setup_holding_matrices_vectors(c)
 
     # Initialise the ensemble (A)
     A = initialise_ensemble(p, c, A)
@@ -62,6 +52,28 @@ def main(fname):
 
 class GenericClass:
     pass
+
+def setup_holding_matrices_vectors(c):
+
+    # Setup matrix holding ensemble members
+    A = np.zeros((c.ndims, c.nrens))
+
+    # Setup matrix holding innovations
+    D = np.zeros((c.nrobs, c.nrens))
+
+    # Setup matrix holding HA'
+    S = np.zeros((c.nrobs, c.nrens))
+
+    # Setup matrix holding obs pertubations
+    E = np.zeros((c.nrobs, c.nrens))
+
+    # Setup ensemble covariance matrix of the errors
+    Q = np.zeros((c.ndims, c.nrens))
+
+    # model errors
+    p_k = np.zeros(c.ndims)
+
+    return A, D, S, E, Q, p_k
 
 def setup_initial_conditions(p, c):
 
