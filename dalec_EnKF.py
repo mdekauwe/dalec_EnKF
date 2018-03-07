@@ -49,8 +49,30 @@ def main(fname):
 
     for i in range(len(met)):
         forecast(A, Q, p_k, c, p, met, i)
-        print(p_k[c.POS_CL])
+
+
+        # Recalcualte model forecast where observations are avaliable
+        #if c.nrobs:
+            #analysis(A, c, o, rand_num_gen);
+
+        dump_output()
         
+def dump_output():
+
+    x = 0.0
+    x2 = 0.0
+    for j in range(c.nrens):
+    	ensemble_member = A[SV_POS_GPP,j]
+    	x += ensemble_member
+    	x2 += ensemble_member**2
+
+    ensemble_member_avg = x / double(c.nrens)
+    ensemble_member_stdev_error = np.sqrt((x2 - \
+                                    (x**2) / double(c.nrens) ) /\
+                                     double(c.nrens))
+
+    print(ensemble_member_avg, ensemble_member_stdev_error)
+
 class GenericClass:
     pass
 
@@ -102,7 +124,7 @@ def setup_initial_conditions(p, c):
     # alpha and delta_timestep (as long as the dynamical model is linear).
     p.rho = setup_stochastic_model_error(p)
 
-    c.nrobs = 0
+    c.nrobs = False
     c.ndims = 16
     c.nrens = 200
     c.max_params = 15
