@@ -194,7 +194,7 @@ def initialise_error_stuff(c, err_var, err_type, qk):
     err_type[c.POS_GPP] = 1
 
     # initial qk matrix
-    qk = np.random.normal(0.0, 1.0, c.ndims*c.nrens).reshape(c.ndims,c.nrens)
+    qk = np.random.normal(0.0, 1.0, c.ndims * c.nrens).reshape(c.ndims,c.nrens)
 
     return err_var, err_type, qk
 
