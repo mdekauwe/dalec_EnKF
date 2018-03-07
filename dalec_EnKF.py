@@ -55,9 +55,9 @@ def main(fname):
         #if c.nrobs:
             #analysis(A, c, o, rand_num_gen);
 
-        dump_output(c), A
+        dump_output(c, A)
 
-def dump_output(c):
+def dump_output(c, A):
 
     x = 0.0
     x2 = 0.0
@@ -66,10 +66,10 @@ def dump_output(c):
     	x += ensemble_member
     	x2 += ensemble_member**2
 
-    ensemble_member_avg = x / double(c.nrens)
+    ensemble_member_avg = x / float(c.nrens)
     ensemble_member_stdev_error = np.sqrt((x2 - \
-                                    (x**2) / double(c.nrens) ) /\
-                                     double(c.nrens))
+                                    (x**2) / float(c.nrens) ) /\
+                                     float(c.nrens))
 
     print(ensemble_member_avg, ensemble_member_stdev_error)
 
