@@ -52,26 +52,10 @@ def main(fname):
         (A, Q, p_k) = forecast(A, Q, p_k, c, p, met, i)
 
         # Recalcualte model forecast where observations are avaliable
-        #if c.nrobs:
+        #if c.nrobs > 0:
         #    analysis(A, c, obs)
 
         dump_output(c, A)
-
-
-def dump_output(c, A):
-
-    #x = np.sum(A[c.POS_GPP,:])
-    #x2 = np.sum(A[c.POS_GPP,:]**2)
-
-    x = np.sum(A[c.POS_CL,:])
-    x2 = np.sum(A[c.POS_CL,:]**2)
-
-    ensemble_member_avg = x / float(c.nrens)
-    ensemble_member_stdev_error = np.sqrt((x2 - \
-                                    (x**2) / float(c.nrens) ) /\
-                                    float(c.nrens))
-
-    print(ensemble_member_avg, ensemble_member_stdev_error)
 
 class GenericClass:
     pass
@@ -124,9 +108,9 @@ def setup_initial_conditions(p, c):
     # alpha and delta_timestep (as long as the dynamical model is linear).
     p.rho = setup_stochastic_model_error(p)
 
-    c.nrobs = False
-    c.ndims = 16
-    c.nrens = 200
+    c.nrobs = 0 # Number of observations
+    c.ndims = 16  # Dimension of model state
+    c.nrens = 200 # Number of ensemble members
     c.max_params = 15
     c.seed = 0
 
@@ -196,7 +180,6 @@ def forecast(A, Q, p_k, c, p, met, i):
     # generate model prediction
     lai = np.maximum(0.1, A[c.POS_CF,:]  / p.sla)
     gpp = acm(met, p, lai, i)
-
 
     A_tmp[c.POS_GPP,:] = gpp
     A_tmp[c.POS_RA,:] = gpp * p.t2
@@ -327,6 +310,21 @@ def analysis(A, c, obs):
     S_mean = np.zeros(c.nrobs)
     HA_mean = np.zeros(c.nrobs)
     A_mean = np.zeros(c.nrobs)
+
+def dump_output(c, A):
+
+    #x = np.sum(A[c.POS_GPP,:])
+    #x2 = np.sum(A[c.POS_GPP,:]**2)
+
+    x = np.sum(A[c.POS_CL,:])
+    x2 = np.sum(A[c.POS_CL,:]**2)
+
+    ensemble_member_avg = x / float(c.nrens)
+    ensemble_member_stdev_error = np.sqrt((x2 - \
+                                    (x**2) / float(c.nrens) ) /\
+                                    float(c.nrens))
+
+    print(ensemble_member_avg, ensemble_member_stdev_error)
 
 if __name__ == "__main__":
 
