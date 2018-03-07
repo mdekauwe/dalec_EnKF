@@ -47,12 +47,10 @@ def main(fname):
     # Initial error covariance matrix Q matrix
     Q = initialise_error_covariance(c, Q)
 
-    # setup factor to ensure variance growth over time becomes independent of
-    # alpha and delta_timestep (as long as the dynamical model is linear).
-    rho = setup_stochastic_model_error()
-
-    forecast(A, Q, p_k, c, p, met)
-
+    for i in range(len(met)):
+        forecast(A, Q, p_k, c, p, met, i)
+        print(p_k[c.POS_CL])
+        
 class GenericClass:
     pass
 
@@ -89,6 +87,20 @@ def setup_initial_conditions(p, c):
     # location - oregon
     p.lat = 44.4;
     p.sla = 111.
+
+    # timestep
+    p.delta_t = 1.0
+
+    # specified time decorrelation length s.
+    p.tau = 1.0
+
+    # The factor a should be related to the time step used, eqn 32
+    # (i.e. this is zero)
+    p.alpha = 1.0 - (p.delta_t / p.tau)
+
+    # setup factor to ensure variance growth over time becomes independent of
+    # alpha and delta_timestep (as long as the dynamical model is linear).
+    p.rho = setup_stochastic_model_error(p)
 
     c.nrobs = 0
     c.ndims = 16
@@ -143,33 +155,21 @@ def initialise_error_covariance(c, Q):
 
     return Q
 
-def setup_stochastic_model_error():
+def setup_stochastic_model_error(p):
     """
     Set up stochastic model error according to eqn 42 - Evenson, 2003. This
     ensures that the variance growth over time becomes independent of alpha and
     delta_t (as long as the dynamical model is linear).
     """
-    # timestep
-    delta_t = 1.0
-
-    # specified time decorrelation length s.
-    tau = 1.0
-
-    # The factor a should be related to the time step used, eqn 32
-    # (i.e. this is zero)
-    alpha = 1.0 - (delta_t / tau)
 
     # number of timesteps per time unit
     n = 1.0
 
-    num = (1.0 - alpha)**2
-    den = n - 2.0 * alpha * n * alpha**2 + (2.0 * alpha)**(n + 1.0)
-    rho = np.sqrt(1.0 / delta_t * num / den)
+    num = (1.0 - p.alpha)**2
+    den = n - 2.0 * p.alpha * n * p.alpha**2 + (2.0 * p.alpha)**(n + 1.0)
+    return np.sqrt(1.0 / p.delta_t * num / den)
 
-    return rho
-
-
-def forecast(A, Q, p_k, c, p, met):
+def forecast(A, Q, p_k, c, p, met, i):
 
     A_tmp = np.zeros((c.ndims, c.nrens))
     A_mean = np.zeros(c.ndims)
@@ -178,19 +178,88 @@ def forecast(A, Q, p_k, c, p, met):
     for j in range(c.nrens):
         # To stop the possibility of having negative ensemble lais */
         lai = np.maximum(0.1, A[c.POS_CF, j]  / p.sla)
-        gpp = acm(met, p , lai, j)
+        gpp = acm(met, p , lai, i)
 
+        A_tmp[c.POS_GPP,j] = gpp
+        A_tmp[c.POS_RA,j] = gpp * p.t2
+        A_tmp[c.POS_AF,j] = gpp * p.t3 * (1. - p.t2)
+        A_tmp[c.POS_AR,j] = gpp * p.t4 * (1. - p.t2)
+        A_tmp[c.POS_AW,j] = gpp * (1. - p.t3 - p.t4) * (1. - p.t2)
+        A_tmp[c.POS_LF,j] = A[c.POS_CF,j] * p.t5
+        A_tmp[c.POS_LW,j] = A[c.POS_CW,j] * p.t6
+        A_tmp[c.POS_LR,j] = A[c.POS_CR,j] * p.t7
+        A_tmp[c.POS_RH1,j] = np.exp(0.0693 * met.temp[i]) * A[c.POS_CL,j] * p.t8
+        A_tmp[c.POS_RH2,j] = np.exp(0.0693 * met.temp[i]) * A[c.POS_CS,j] * p.t9
+        A_tmp[c.POS_D,j] = np.exp(0.0693 * met.temp[i]) * A[c.POS_CL,j] * p.t1
+        A_tmp[c.POS_CF,j] = A[c.POS_CF,j] + A[c.POS_AF,j] - A[c.POS_LF,j]
+        A_tmp[c.POS_CW,j] = A[c.POS_CW,j] + A[c.POS_AW,j] - A[c.POS_LW,j]
+        A_tmp[c.POS_CR,j] = A[c.POS_CR,j] + A[c.POS_AR,j] - A[c.POS_LR,j]
+        A_tmp[c.POS_CL,j] = A[c.POS_CL,j] + A[c.POS_LF,j] + A[c.POS_LR,j] - \
+                            A[c.POS_RH1,j] - A[c.POS_D,j]
+        A_tmp[c.POS_CS,j] = A[c.POS_CS,j] + A[c.POS_D,j] + \
+                            A[c.POS_LW,j] - A[c.POS_RH2,j]
 
-def acm(met, p , lai, idx):
+    A = A_tmp.copy()
 
-    trange = 0.5 * (met.maxt[idx] - met.mint[idx])
-    gs = np.fabs(met.psid[idx])**p.a9 / (p.a5 * met.rtot[idx] + trange)
-    pp = lai * met.nit[idx] / gs * p.a0 * np.exp(p.a7 * met.maxt[idx])
+    # Ensemble (A) mean evolves (f*(sv) / nrens) - eqn 26 Evenson 2003
+    for i in range(c.ndims):
+        mean = 0.0;
+        sumx = 0.0;
+        for j in range(c.nrens):
+            sumx += A[i,j]
+            A_mean[i] = sumx / float(c.nrens)
+
+    # Grow the variance due to stochastic forcings and add it onto the model
+    # state - eqn 34 evenson 2003
+    for i in range(c.ndims):
+        for j in range(c.nrens):
+            new_ensemble_state = A[i,j] + np.sqrt(p.delta_t) * p.rho * \
+                                    np.sqrt(p_k[i]) * Q[i,j]
+            A[i,j] = new_ensemble_state
+
+    # generate model error estimate
+    for i in range(c.ndims):
+        for j in range(c.nrens):
+            Q_previous_time_step = Q[i,j]
+            Q[i,j] = p.alpha * Q_previous_time_step + \
+                        np.sqrt(1.0 - p.alpha * p.alpha) * \
+                        np.random.normal(0.0, 1.0)
+
+    # Calculate the new model error
+    p_k = generate_model_error_matrix(c, p_k, A_mean)
+
+def generate_model_error_matrix(c, p_k, A_mean):
+
+	# MODEL ERROR -p_k
+    p_k[c.POS_RA] = 0.2 * A_mean[c.POS_RA]
+    p_k[c.POS_AF] = 0.2 * A_mean[c.POS_AF]
+    p_k[c.POS_AW] = 0.2 * A_mean[c.POS_AW]
+    p_k[c.POS_AR] = 0.2 * A_mean[c.POS_AR]
+    p_k[c.POS_LF] = 0.5
+    p_k[c.POS_LW] = 0.5
+    p_k[c.POS_LR] = 0.5
+    p_k[c.POS_CF] = 0.2 * A_mean[c.POS_CF]
+    p_k[c.POS_CW] = 0.2 * A_mean[c.POS_CW]
+    p_k[c.POS_CR] = 0.2 * A_mean[c.POS_CR]
+    p_k[c.POS_RH1] = 0.2 * A_mean[c.POS_RH1]
+    p_k[c.POS_RH2] = 0.2 * A_mean[c.POS_RH2]
+    p_k[c.POS_D] = 0.2 * A_mean[c.POS_D]
+    p_k[c.POS_CL] = 0.2 * A_mean[c.POS_CL]
+    p_k[c.POS_CS] = 0.2 * A_mean[c.POS_CS]
+    p_k[c.POS_GPP] = 0.2 * A_mean[c.POS_GPP]
+
+    return p_k
+
+def acm(met, p , lai, i):
+
+    trange = 0.5 * (met.maxt[i] - met.mint[i])
+    gs = np.fabs(met.psid[i])**p.a9 / (p.a5 * met.rtot[i] + trange)
+    pp = lai * met.nit[i] / gs * p.a0 * np.exp(p.a7 * met.maxt[i])
     qq = p.a2 - p.a3
-    ci = 0.5 * (met.ca[idx] + qq - pp + np.sqrt((met.ca[idx] + qq - pp)**2.0 -\
-         4.0 * (met.ca[idx] * qq - pp * p.a2)))
+    ci = 0.5 * (met.ca[i] + qq - pp + np.sqrt((met.ca[i] + qq - pp)**2.0 -\
+         4.0 * (met.ca[i] * qq - pp * p.a2)))
     e0 = p.a6 * lai**2 / (lai**2 + p.a8)
-    dec = -23.4 * np.cos((360.0 * (met.doy[idx]+ 10.0) / 365.0) * \
+    dec = -23.4 * np.cos((360.0 * (met.doy[i]+ 10.0) / 365.0) * \
             np.pi / 180.0) * np.pi / 180.0
     m = np.tan(p.lat * np.pi / 180.0) * np.tan(dec)
     if m >= 1.0:
@@ -199,8 +268,8 @@ def acm(met, p , lai, idx):
         dayl = 0.0
     else:
         dayl = 24.0 * np.arccos(-m) / np.pi
-    cps = e0 * met.rad[idx] * gs * (met.ca[idx] - ci) / \
-            (e0 * met.rad[idx] + gs * (met.ca[idx] - ci))
+    cps = e0 * met.rad[i] * gs * (met.ca[i] - ci) / \
+            (e0 * met.rad[i] + gs * (met.ca[i] - ci))
     gpp = cps * (p.a1 * dayl + p.a4)
 
     return gpp
