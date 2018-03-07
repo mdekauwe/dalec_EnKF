@@ -222,11 +222,7 @@ def forecast(A, Q, p_k, c, p, met, i):
 
     # Ensemble (A) mean evolves (f*(sv) / nrens) - eqn 26 Evenson 2003
     for i in range(c.ndims):
-        mean = 0.0;
-        sumx = 0.0;
-        for j in range(c.nrens):
-            sumx += A[i,j]
-            A_mean[i] = sumx / float(c.nrens)
+        A_mean[i] = np.sum(A[i,:]) / float(c.nrens)
 
     # Grow the variance due to stochastic forcings and add it onto the model
     # state - eqn 34 evenson 2003
@@ -271,7 +267,7 @@ def generate_model_error_matrix(c, p_k, A_mean):
 
     return p_k
 
-def acm(met, p , lai, i):
+def acm(met, p, lai, i):
 
     trange = 0.5 * (met.maxt[i] - met.mint[i])
     gs = np.fabs(met.psid[i])**p.a9 / (p.a5 * met.rtot[i] + trange)
