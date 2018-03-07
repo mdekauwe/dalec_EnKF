@@ -33,7 +33,7 @@ def main(fname):
 
     setup_initial_conditions(p, c)
 
-    (A, D, S, E, Q, p_k) = setup_holding_matrices_vectors(c)
+    (A, D, S, E, Q, q_k) = setup_holding_matrices_vectors(c)
 
     # Initialise the ensemble (A)
     A = initialise_ensemble(p, c, A)
@@ -42,7 +42,7 @@ def main(fname):
     Q = initialise_error_covariance(c, Q)
 
     for i in range(len(met)):
-        (A, Q, p_k) = forecast(A, Q, p_k, c, p, met, i)
+        (A, Q, q_k) = forecast(A, Q, q_k, c, p, met, i)
 
         # Recalcualte model forecast where observations are avaliable
         #if c.nrobs > 0:
@@ -71,9 +71,9 @@ def setup_holding_matrices_vectors(c):
     Q = np.zeros((c.ndims, c.nrens))
 
     # model errors
-    p_k = np.zeros(c.ndims)
+    q_k = np.zeros(c.ndims)
 
-    return A, D, S, E, Q, p_k
+    return A, D, S, E, Q, q_k
 
 def setup_initial_conditions(p, c):
 
@@ -187,7 +187,7 @@ def setup_stochastic_model_error(p):
     den = n - 2.0 * p.alpha * n * p.alpha**2 + (2.0 * p.alpha)**(n + 1.0)
     return np.sqrt(1.0 / p.delta_t * num / den)
 
-def forecast(A, Q, p_k, c, p, met, i):
+def forecast(A, Q, q_k, c, p, met, i):
 
     A_tmp = np.zeros((c.ndims, c.nrens))
     A_mean = np.zeros(c.ndims)
@@ -226,7 +226,7 @@ def forecast(A, Q, p_k, c, p, met, i):
     for i in range(c.ndims):
         for j in range(c.nrens):
             new_ensemble_state = A[i,j] + np.sqrt(p.delta_t) * p.rho * \
-                                    np.sqrt(p_k[i]) * Q[i,j]
+                                    np.sqrt(q_k[i]) * Q[i,j]
             A[i,j] = new_ensemble_state
 
     # generate model error estimate
@@ -238,31 +238,31 @@ def forecast(A, Q, p_k, c, p, met, i):
                         np.random.normal(0.0, 1.0)
 
     # Calculate the new model error
-    p_k = generate_model_error_matrix(c, p_k, A_mean)
+    q_k = generate_model_error_matrix(c, q_k, A_mean)
 
-    return A, Q, p_k
+    return A, Q, q_k
 
-def generate_model_error_matrix(c, p_k, A_mean):
+def generate_model_error_matrix(c, q_k, A_mean):
 
-	# MODEL ERROR -p_k
-    p_k[c.POS_RA] = 0.2 * A_mean[c.POS_RA]
-    p_k[c.POS_AF] = 0.2 * A_mean[c.POS_AF]
-    p_k[c.POS_AW] = 0.2 * A_mean[c.POS_AW]
-    p_k[c.POS_AR] = 0.2 * A_mean[c.POS_AR]
-    p_k[c.POS_LF] = 0.5
-    p_k[c.POS_LW] = 0.5
-    p_k[c.POS_LR] = 0.5
-    p_k[c.POS_CF] = 0.2 * A_mean[c.POS_CF]
-    p_k[c.POS_CW] = 0.2 * A_mean[c.POS_CW]
-    p_k[c.POS_CR] = 0.2 * A_mean[c.POS_CR]
-    p_k[c.POS_RH1] = 0.2 * A_mean[c.POS_RH1]
-    p_k[c.POS_RH2] = 0.2 * A_mean[c.POS_RH2]
-    p_k[c.POS_D] = 0.2 * A_mean[c.POS_D]
-    p_k[c.POS_CL] = 0.2 * A_mean[c.POS_CL]
-    p_k[c.POS_CS] = 0.2 * A_mean[c.POS_CS]
-    p_k[c.POS_GPP] = 0.2 * A_mean[c.POS_GPP]
+	# MODEL ERROR -q_k
+    q_k[c.POS_RA] = 0.2 * A_mean[c.POS_RA]
+    q_k[c.POS_AF] = 0.2 * A_mean[c.POS_AF]
+    q_k[c.POS_AW] = 0.2 * A_mean[c.POS_AW]
+    q_k[c.POS_AR] = 0.2 * A_mean[c.POS_AR]
+    q_k[c.POS_LF] = 0.5
+    q_k[c.POS_LW] = 0.5
+    q_k[c.POS_LR] = 0.5
+    q_k[c.POS_CF] = 0.2 * A_mean[c.POS_CF]
+    q_k[c.POS_CW] = 0.2 * A_mean[c.POS_CW]
+    q_k[c.POS_CR] = 0.2 * A_mean[c.POS_CR]
+    q_k[c.POS_RH1] = 0.2 * A_mean[c.POS_RH1]
+    q_k[c.POS_RH2] = 0.2 * A_mean[c.POS_RH2]
+    q_k[c.POS_D] = 0.2 * A_mean[c.POS_D]
+    q_k[c.POS_CL] = 0.2 * A_mean[c.POS_CL]
+    q_k[c.POS_CS] = 0.2 * A_mean[c.POS_CS]
+    q_k[c.POS_GPP] = 0.2 * A_mean[c.POS_GPP]
 
-    return p_k
+    return q_k
 
 def acm(met, p, lai, i):
 
@@ -300,7 +300,7 @@ def analysis(A, c, obs):
     sig_sum = 0.0
     sig_sum1 = 0.0
 
-    # Minimum of nrobs and nrens (evenson page 356)
+    # Minimum of nrobs and nrens
     nrmin = np.minimum(c.nrobs+1, c.nrens)
 
     I = np.zeros((c.nrens,c.nrens))
