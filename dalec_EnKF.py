@@ -33,15 +33,15 @@ def main(fname):
 
     setup_initial_conditions(p, c)
 
-    (A, err_var, err_type, ens_var, qk) = setup_holding_matrices_vectors(c)
+    (A, err_var, err_type, ens_var, q) = setup_holding_matrices_vectors(c)
 
     A = initialise_ensemble(p, c, A)
 
-    (err_var, err_type, qk) = initialise_error_stuff(c, err_var, err_type, qk)
+    (err_var, err_type, q) = initialise_error_stuff(c, err_var, err_type, q)
 
     for i in range(len(met)):
-        (A, ens_var, qk) = forecast(c, p, met, i, A, err_var,
-                                       err_type, ens_var, qk)
+        (A, ens_var, q) = forecast(c, p, met, i, A, err_var,
+                                       err_type, ens_var, q)
 
         # Recalcualte model forecast where observations are avaliable
         #if c.nrobs > 0:
@@ -60,9 +60,11 @@ def setup_holding_matrices_vectors(c):
     err_var = np.zeros(c.ndims)
     err_type = np.zeros(c.ndims)
     ens_var = np.zeros(c.ndims)
-    qk = np.zeros((c.ndims, c.nrens))
 
-    return A, err_var, err_type, ens_var, qk
+    # model noise vector 
+    q = np.zeros((c.ndims, c.nrens))
+
+    return A, err_var, err_type, ens_var, q
 
 def setup_initial_conditions(p, c):
 
@@ -156,7 +158,7 @@ def initialise_ensemble(p, c, A):
 
     return A
 
-def initialise_error_stuff(c, err_var, err_type, qk):
+def initialise_error_stuff(c, err_var, err_type, q):
 
     # default error variances for the state vector elements
     err_var[c.POS_RA] = 0.2
@@ -193,10 +195,10 @@ def initialise_error_stuff(c, err_var, err_type, qk):
     err_type[c.POS_CS] = 1
     err_type[c.POS_GPP] = 1
 
-    # initial qk matrix
-    qk = np.random.normal(0.0, 1.0, c.ndims * c.nrens).reshape(c.ndims,c.nrens)
+    # initial noise matrix
+    q = np.random.normal(0.0, 1.0, c.ndims * c.nrens).reshape(c.ndims, c.nrens)
 
-    return err_var, err_type, qk
+    return err_var, err_type, q
 
 def setup_stochastic_model_error(p):
     """
@@ -213,7 +215,7 @@ def setup_stochastic_model_error(p):
 
     return np.sqrt(1.0 / p.delta_t * num / den)
 
-def forecast(c, p, met, i, A, err_var, err_type, ens_var, qk):
+def forecast(c, p, met, i, A, err_var, err_type, ens_var, q):
 
     A_tmp = np.zeros((c.ndims, c.nrens))
     A_mean = np.zeros(c.ndims)
@@ -251,20 +253,20 @@ def forecast(c, p, met, i, A, err_var, err_type, ens_var, qk):
     for i in range(c.ndims):
         for j in range(c.nrens):
             A[i,j] += np.sqrt(p.delta_t) * p.rho * \
-                        np.sqrt(ens_var[i]) * qk[i,j]
+                        np.sqrt(ens_var[i]) * q[i,j]
 
     # simulate the time evolution of model errors
     for i in range(c.ndims):
         for j in range(c.nrens):
-            qk_previous_time_step = qk[i,j]
-            qk[i,j] = p.alpha * qk_previous_time_step + \
+            q_previous_time_step = q[i,j]
+            q[i,j] = p.alpha * q_previous_time_step + \
                             np.sqrt(1.0 - p.alpha**2) * \
                             np.random.normal(0.0, 1.0)
 
     # calculate the error variance
     ens_var = assign_model_errors(c, ens_var, err_var, err_type, A_mean)
 
-    return A, ens_var, qk
+    return A, ens_var, q
 
 def assign_model_errors(c, ens_var, err_var, err_type, A_mean):
 
@@ -275,27 +277,6 @@ def assign_model_errors(c, ens_var, err_var, err_type, A_mean):
             ens_var[i] = err_var[i] * np.fabs(A_mean[i])
 
     return ens_var
-
-def generate_model_error_matrix(c, q_k, A_mean):
-
-    qk[c.POS_RA] = 0.2 * A_mean[c.POS_RA]
-    qk[c.POS_AF] = 0.2 * A_mean[c.POS_AF]
-    qk[c.POS_AW] = 0.2 * A_mean[c.POS_AW]
-    qk[c.POS_AR] = 0.2 * A_mean[c.POS_AR]
-    qk[c.POS_LF] = 0.5
-    qk[c.POS_LW] = 0.5
-    qk[c.POS_LR] = 0.5
-    qk[c.POS_CF] = 0.2 * A_mean[c.POS_CF]
-    qk[c.POS_CW] = 0.2 * A_mean[c.POS_CW]
-    qk[c.POS_CR] = 0.2 * A_mean[c.POS_CR]
-    qk[c.POS_RH1] = 0.2 * A_mean[c.POS_RH1]
-    qk[c.POS_RH2] = 0.2 * A_mean[c.POS_RH2]
-    qk[c.POS_D] = 0.2 * A_mean[c.POS_D]
-    qk[c.POS_CL] = 0.2 * A_mean[c.POS_CL]
-    qk[c.POS_CS] = 0.2 * A_mean[c.POS_CS]
-    qk[c.POS_GPP] = 0.2 * A_mean[c.POS_GPP]
-
-    return qk
 
 def acm(met, p, lai, i):
 
