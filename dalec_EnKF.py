@@ -194,29 +194,28 @@ def forecast(A, Q, p_k, c, p, met, i):
     A_mean = np.zeros(c.ndims)
 
     # generate model prediction
-    for j in range(c.nrens):
-        # To stop the possibility of having negative ensemble lais */
-        lai = np.maximum(0.1, A[c.POS_CF,j]  / p.sla)
-        gpp = acm(met, p, lai, i)
+    lai = np.maximum(0.1, A[c.POS_CF,:]  / p.sla)
+    gpp = acm(met, p, lai, i)
 
-        A_tmp[c.POS_GPP,j] = gpp
-        A_tmp[c.POS_RA,j] = gpp * p.t2
-        A_tmp[c.POS_AF,j] = gpp * p.t3 * (1. - p.t2)
-        A_tmp[c.POS_AR,j] = gpp * p.t4 * (1. - p.t2)
-        A_tmp[c.POS_AW,j] = gpp * (1. - p.t3 - p.t4) * (1. - p.t2)
-        A_tmp[c.POS_LF,j] = A[c.POS_CF,j] * p.t5
-        A_tmp[c.POS_LW,j] = A[c.POS_CW,j] * p.t6
-        A_tmp[c.POS_LR,j] = A[c.POS_CR,j] * p.t7
-        A_tmp[c.POS_RH1,j] = np.exp(0.0693 * met.temp[i]) * A[c.POS_CL,j] * p.t8
-        A_tmp[c.POS_RH2,j] = np.exp(0.0693 * met.temp[i]) * A[c.POS_CS,j] * p.t9
-        A_tmp[c.POS_D,j] = np.exp(0.0693 * met.temp[i]) * A[c.POS_CL,j] * p.t1
-        A_tmp[c.POS_CF,j] = A[c.POS_CF,j] + A[c.POS_AF,j] - A[c.POS_LF,j]
-        A_tmp[c.POS_CW,j] = A[c.POS_CW,j] + A[c.POS_AW,j] - A[c.POS_LW,j]
-        A_tmp[c.POS_CR,j] = A[c.POS_CR,j] + A[c.POS_AR,j] - A[c.POS_LR,j]
-        A_tmp[c.POS_CL,j] = A[c.POS_CL,j] + A[c.POS_LF,j] + A[c.POS_LR,j] - \
-                            A[c.POS_RH1,j] - A[c.POS_D,j]
-        A_tmp[c.POS_CS,j] = A[c.POS_CS,j] + A[c.POS_D,j] + \
-                            A[c.POS_LW,j] - A[c.POS_RH2,j]
+
+    A_tmp[c.POS_GPP,:] = gpp
+    A_tmp[c.POS_RA,:] = gpp * p.t2
+    A_tmp[c.POS_AF,:] = gpp * p.t3 * (1. - p.t2)
+    A_tmp[c.POS_AR,:] = gpp * p.t4 * (1. - p.t2)
+    A_tmp[c.POS_AW,:] = gpp * (1. - p.t3 - p.t4) * (1. - p.t2)
+    A_tmp[c.POS_LF,:] = A[c.POS_CF,:] * p.t5
+    A_tmp[c.POS_LW,:] = A[c.POS_CW,:] * p.t6
+    A_tmp[c.POS_LR,:] = A[c.POS_CR,:] * p.t7
+    A_tmp[c.POS_RH1,:] = np.exp(0.0693 * met.temp[i]) * A[c.POS_CL,:] * p.t8
+    A_tmp[c.POS_RH2,:] = np.exp(0.0693 * met.temp[i]) * A[c.POS_CS,:] * p.t9
+    A_tmp[c.POS_D,:] = np.exp(0.0693 * met.temp[i]) * A[c.POS_CL,:] * p.t1
+    A_tmp[c.POS_CF,:] = A[c.POS_CF,:] + A[c.POS_AF,:] - A[c.POS_LF,:]
+    A_tmp[c.POS_CW,:] = A[c.POS_CW,:] + A[c.POS_AW,:] - A[c.POS_LW,:]
+    A_tmp[c.POS_CR,:] = A[c.POS_CR,:] + A[c.POS_AR,:] - A[c.POS_LR,:]
+    A_tmp[c.POS_CL,:] = A[c.POS_CL,:] + A[c.POS_LF,:] + A[c.POS_LR,:] - \
+                        A[c.POS_RH1,:] - A[c.POS_D,:]
+    A_tmp[c.POS_CS,:] = A[c.POS_CS,:] + A[c.POS_D,:] + \
+                        A[c.POS_LW,:] - A[c.POS_RH2,:]
 
     A = A_tmp.copy()
 
