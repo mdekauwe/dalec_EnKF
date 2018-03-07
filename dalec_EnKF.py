@@ -49,7 +49,7 @@ def main(fname):
     Q = initialise_error_covariance(c, Q)
 
     for i in range(len(met)):
-        forecast(A, Q, p_k, c, p, met, i)
+        A = forecast(A, Q, p_k, c, p, met, i)
 
         # Recalcualte model forecast where observations are avaliable
         #if c.nrobs:
@@ -246,6 +246,8 @@ def forecast(A, Q, p_k, c, p, met, i):
 
     # Calculate the new model error
     p_k = generate_model_error_matrix(c, p_k, A_mean)
+
+    return A
 
 def generate_model_error_matrix(c, p_k, A_mean):
 
