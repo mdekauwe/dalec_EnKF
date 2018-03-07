@@ -33,8 +33,11 @@ def main(fname):
 
     setup_initial_conditions(p, c)
 
-    # Setup matrix holding ensemble members (A)
+    # Setup matrix holding ensemble members
     A = np.zeros((c.ndims, c.nrens))
+
+    # Setup matrix holding innovations
+    D = np.zeros((c.nrobs, c.nrens))
 
     # Setup ensemble covariance matrix of the errors (Q)
     Q = np.zeros((c.ndims, c.nrens))
