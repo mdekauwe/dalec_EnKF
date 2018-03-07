@@ -52,10 +52,11 @@ def main(fname):
         forecast(A, Q, p_k, c, p, met, i)
 
         # Recalcualte model forecast where observations are avaliable
-        if c.nrobs:
-            analysis(A, c, obs)
+        #if c.nrobs:
+        #    analysis(A, c, obs)
 
         dump_output(c, A)
+        sys.exit()
 
 def dump_output(c, A):
 
@@ -107,7 +108,7 @@ def setup_initial_conditions(p, c):
     p.a9 = 0.0006;
 
     # location - oregon
-    p.lat = 44.4;
+    p.lat = 44.4
     p.sla = 111.
 
     # timestep
@@ -150,22 +151,22 @@ def setup_initial_conditions(p, c):
 def initialise_ensemble(p, c, A):
 
     for j in range(c.nrens):
-        A[c.POS_RA,j] = 1.0 * np.random.normal(0.0, 0.1 * 1.0)
-        A[c.POS_AF,j] = 0.3 * np.random.normal(0.0, 0.1 * 0.3)
-        A[c.POS_AW,j] = 0.3 * np.random.normal(0.0, 0.1 * 0.3)
-        A[c.POS_AR,j] = 0.3 * np.random.normal(0.0, 0.1 * 0.3)
-        A[c.POS_LF,j] = 0.3 * np.random.normal(0.0, 0.1 * 0.3)
-        A[c.POS_LW,j] = 0.3 * np.random.normal(0.0, 0.1 * 0.3)
-        A[c.POS_LR,j] = 0.3 * np.random.normal(0.0, 0.1 * 0.3)
-        A[c.POS_RH1,j] = 0.3 * np.random.normal(0.0, 0.1 * 0.3)
-        A[c.POS_RH2,j] = 0.3 * np.random.normal(0.0, 0.1 * 0.3)
-        A[c.POS_D,j] = 0.3 * np.random.normal(0.0, 0.1 * 0.3)
-        A[c.POS_GPP,j] = 1.0 * np.random.normal(0.0, 0.1 * 1.0)
-        A[c.POS_CF,j] = p.cf0 * np.random.normal(0.0, 0.1 * p.cf0)
-        A[c.POS_CW,j] = p.cw0 * np.random.normal(0.0, 0.1 * p.cw0)
-        A[c.POS_CR,j] = p.cr0 * np.random.normal(0.0, 0.1 * p.cr0)
-        A[c.POS_CL,j] = p.cl0 * np.random.normal(0.0, 0.1 * p.cl0)
-        A[c.POS_CS,j] = p.cs0 * np.random.normal(0.0, 0.1 * p.cs0)
+        A[c.POS_RA,j] = 1.0 + np.random.normal(0.0, 0.1 * 1.0)
+        A[c.POS_AF,j] = 0.3 + np.random.normal(0.0, 0.1 * 0.3)
+        A[c.POS_AW,j] = 0.3 + np.random.normal(0.0, 0.1 * 0.3)
+        A[c.POS_AR,j] = 0.3 + np.random.normal(0.0, 0.1 * 0.3)
+        A[c.POS_LF,j] = 0.3 + np.random.normal(0.0, 0.1 * 0.3)
+        A[c.POS_LW,j] = 0.3 + np.random.normal(0.0, 0.1 * 0.3)
+        A[c.POS_LR,j] = 0.3 + np.random.normal(0.0, 0.1 * 0.3)
+        A[c.POS_RH1,j] = 0.3 + np.random.normal(0.0, 0.1 * 0.3)
+        A[c.POS_RH2,j] = 0.3 + np.random.normal(0.0, 0.1 * 0.3)
+        A[c.POS_D,j] = 0.3 + np.random.normal(0.0, 0.1 * 0.3)
+        A[c.POS_GPP,j] = 1.0 + np.random.normal(0.0, 0.1 * 1.0)
+        A[c.POS_CF,j] = p.cf0 + np.random.normal(0.0, 0.1 * p.cf0)
+        A[c.POS_CW,j] = p.cw0 + np.random.normal(0.0, 0.1 * p.cw0)
+        A[c.POS_CR,j] = p.cr0 + np.random.normal(0.0, 0.1 * p.cr0)
+        A[c.POS_CL,j] = p.cl0 + np.random.normal(0.0, 0.1 * p.cl0)
+        A[c.POS_CS,j] = p.cs0 + np.random.normal(0.0, 0.1 * p.cs0)
 
     return A
 
@@ -199,9 +200,9 @@ def forecast(A, Q, p_k, c, p, met, i):
     # generate model prediction
     for j in range(c.nrens):
         # To stop the possibility of having negative ensemble lais */
-        lai = np.maximum(0.1, A[c.POS_CF, j]  / p.sla)
+        lai = np.maximum(0.1, A[c.POS_CF,j]  / p.sla)
         gpp = acm(met, p , lai, i)
-
+        print(lai, A[c.POS_CF,j])
         A_tmp[c.POS_GPP,j] = gpp
         A_tmp[c.POS_RA,j] = gpp * p.t2
         A_tmp[c.POS_AF,j] = gpp * p.t3 * (1. - p.t2)
@@ -220,7 +221,7 @@ def forecast(A, Q, p_k, c, p, met, i):
                             A[c.POS_RH1,j] - A[c.POS_D,j]
         A_tmp[c.POS_CS,j] = A[c.POS_CS,j] + A[c.POS_D,j] + \
                             A[c.POS_LW,j] - A[c.POS_RH2,j]
-
+    sys.exit()
     A = A_tmp.copy()
 
     # Ensemble (A) mean evolves (f*(sv) / nrens) - eqn 26 Evenson 2003
