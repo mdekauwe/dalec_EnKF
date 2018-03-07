@@ -62,7 +62,7 @@ def dump_output(c):
     x = 0.0
     x2 = 0.0
     for j in range(c.nrens):
-    	ensemble_member = A[SV_POS_GPP,j]
+    	ensemble_member = A[c.POS_GPP,j]
     	x += ensemble_member
     	x2 += ensemble_member**2
 
