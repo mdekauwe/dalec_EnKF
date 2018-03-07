@@ -176,21 +176,21 @@ def initialise_error_stuff(c, err_var, err_type, qk):
     err_var[c.POS_CS] = 0.2
     err_var[c.POS_GPP] = 0.2
 
-    err_type[c.POS_RA]  = 1
-    err_type[c.POS_AF]  = 1
-    err_type[c.POS_AW]  = 1
-    err_type[c.POS_AR]  = 1
-    err_type[c.POS_LF]  = 0
-    err_type[c.POS_LW]  = 0
-    err_type[c.POS_LR]  = 0
-    err_type[c.POS_CF]  = 1
-    err_type[c.POS_CW]  = 1
-    err_type[c.POS_CR]  = 1
+    err_type[c.POS_RA] = 1
+    err_type[c.POS_AF] = 1
+    err_type[c.POS_AW] = 1
+    err_type[c.POS_AR] = 1
+    err_type[c.POS_LF] = 0
+    err_type[c.POS_LW] = 0
+    err_type[c.POS_LR] = 0
+    err_type[c.POS_CF] = 1
+    err_type[c.POS_CW] = 1
+    err_type[c.POS_CR] = 1
     err_type[c.POS_RH1] = 1
     err_type[c.POS_RH2] = 1
-    err_type[c.POS_D]   = 1
-    err_type[c.POS_CL]  = 1
-    err_type[c.POS_CS]  = 1
+    err_type[c.POS_D] = 1
+    err_type[c.POS_CL] = 1
+    err_type[c.POS_CS] = 1
     err_type[c.POS_GPP] = 1
 
     # initial qk matrix
