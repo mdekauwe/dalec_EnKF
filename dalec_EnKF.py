@@ -24,6 +24,7 @@ import sys
 
 def main(fname):
 
+    obs = None
     met = pd.read_csv(fname)
 
     # initialise structures
@@ -50,10 +51,9 @@ def main(fname):
     for i in range(len(met)):
         forecast(A, Q, p_k, c, p, met, i)
 
-
         # Recalcualte model forecast where observations are avaliable
-        #if c.nrobs:
-            #analysis(A, c, o, rand_num_gen);
+        if c.nrobs:
+            analysis(A, c, obs)
 
         dump_output(c, A)
 
@@ -296,7 +296,43 @@ def acm(met, p , lai, i):
 
     return gpp
 
+def analysis(A, c, obs):
 
+    """
+    The standard analysis eqn: A = A + Pe H^T(H Pe H^T + Re)^-1 (D - H A) can
+    be reformed using D' = D - HA, Pe = A'(A')^T, Re = YY^T
+    (where Y symbolises Gamma) such that it
+    becomes A = A + A' A'^T H^T(HA' A'^T H^T + YY^T)^-1 D'
+    """
+
+    sig_sum = 0.0
+    sig_sum1 = 0.0
+
+    # Minimum of nrobs and nrens (evenson page 356)
+    nrmin = np.minimum(c.nrobs+1, c.nrens)
+
+    I = np.zeros((c.nrens,c.nrens))
+    U = np.zeros((c.nrobs,nrmin))
+    D = np.zeros((c.nrobs,c.nrens))
+    S = np.zeros((c.nrobs,nrmin))
+    E = np.zeros((c.nrobs,nrmin))
+    H = np.zeros((c.nrobs,c.ndims))
+    HA = np.zeros((c.nrobs,c.nrens))
+    ES = np.zeros((c.nrobs,c.nrens))
+    X1 = np.zeros((nrmin,c.nrens))
+    X2 = np.zeros((nrmin,c.nrens))
+    X3 = np.zeros((c.nrobs,c.nrens))
+    X4 = np.zeros((c.nrens,c.nrens))
+    Reps = np.zeros((c.ndims,c.nrobs))
+    A_tmp = np.zeros((c.ndims,c.nrens))
+    A_dash = np.zeros((c.ndims,c.nrens))
+
+    sig = np.zeros(nrmin)
+    D_mean = np.zeros(c.nrobs)
+    E_mean = np.zeros(c.nrobs)
+    S_mean = np.zeros(c.nrobs)
+    HA_mean = np.zeros(c.nrobs)
+    A_mean = np.zeros(c.nrobs)
 
 if __name__ == "__main__":
 
