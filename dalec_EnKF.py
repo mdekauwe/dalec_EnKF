@@ -55,7 +55,7 @@ def main(fname):
         #if c.nrobs:
             #analysis(A, c, o, rand_num_gen);
 
-        dump_output(c)
+        dump_output(c), A
 
 def dump_output(c):
 
