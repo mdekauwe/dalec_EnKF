@@ -56,21 +56,17 @@ def main(fname):
         #    analysis(A, c, obs)
 
         dump_output(c, A)
-        sys.exit()
+
 
 def dump_output(c, A):
 
-    x = 0.0
-    x2 = 0.0
-    for j in range(c.nrens):
-    	ensemble_member = A[c.POS_GPP,j]
-    	x += ensemble_member
-    	x2 += ensemble_member**2
+    x = np.sum(A[c.POS_GPP,:])
+    x2 = np.sum(A[c.POS_GPP,:]**2)
 
     ensemble_member_avg = x / float(c.nrens)
     ensemble_member_stdev_error = np.sqrt((x2 - \
                                     (x**2) / float(c.nrens) ) /\
-                                     float(c.nrens))
+                                    float(c.nrens))
 
     print(ensemble_member_avg, ensemble_member_stdev_error)
 
@@ -201,8 +197,8 @@ def forecast(A, Q, p_k, c, p, met, i):
     for j in range(c.nrens):
         # To stop the possibility of having negative ensemble lais */
         lai = np.maximum(0.1, A[c.POS_CF,j]  / p.sla)
-        gpp = acm(met, p , lai, i)
-        print(lai, A[c.POS_CF,j])
+        gpp = acm(met, p, lai, i)
+
         A_tmp[c.POS_GPP,j] = gpp
         A_tmp[c.POS_RA,j] = gpp * p.t2
         A_tmp[c.POS_AF,j] = gpp * p.t3 * (1. - p.t2)
@@ -221,7 +217,7 @@ def forecast(A, Q, p_k, c, p, met, i):
                             A[c.POS_RH1,j] - A[c.POS_D,j]
         A_tmp[c.POS_CS,j] = A[c.POS_CS,j] + A[c.POS_D,j] + \
                             A[c.POS_LW,j] - A[c.POS_RH2,j]
-    sys.exit()
+
     A = A_tmp.copy()
 
     # Ensemble (A) mean evolves (f*(sv) / nrens) - eqn 26 Evenson 2003
