@@ -61,7 +61,7 @@ def setup_holding_matrices_vectors(c):
     err_type = np.zeros(c.ndims)
     ens_var = np.zeros(c.ndims)
 
-    # model noise vector 
+    # model noise vector
     q = np.zeros((c.ndims, c.nrens))
 
     return A, err_var, err_type, ens_var, q
@@ -345,8 +345,8 @@ def dump_output(c, A):
     #x = np.sum(A[c.POS_GPP,:])
     #x2 = np.sum(A[c.POS_GPP,:]**2)
 
-    x = np.sum(A[c.POS_CL,:])
-    x2 = np.sum(A[c.POS_CL,:]**2)
+    x = np.sum(A[c.POS_CF,:])
+    x2 = np.sum(A[c.POS_CF,:]**2)
 
     ensemble_member_avg = x / float(c.nrens)
     ensemble_member_stdev_error = np.sqrt((x2 - \
