@@ -51,7 +51,7 @@ def main(fname):
     # alpha and delta_timestep (as long as the dynamical model is linear).
     rho = setup_stochastic_model_error()
 
-    forecast(A, Q, p_k, c, p)
+    forecast(A, Q, p_k, c, p, met)
 
 class GenericClass:
     pass
@@ -169,7 +169,7 @@ def setup_stochastic_model_error():
     return rho
 
 
-def forecast(A, Q, p_k, c, p):
+def forecast(A, Q, p_k, c, p, met):
 
     A_tmp = np.zeros((c.ndims, c.nrens))
     A_mean = np.zeros(c.ndims)
@@ -178,11 +178,33 @@ def forecast(A, Q, p_k, c, p):
     for j in range(c.nrens):
         # To stop the possibility of having negative ensemble lais */
         lai = np.maximum(0.1, A[c.POS_CF, j]  / p.sla)
-        #gpp = acm(lai, p)
+        gpp = acm(met, p , lai, j)
 
-        print(lai)
 
-        sys.exit()
+def acm(met, p , lai, idx):
+
+    trange = 0.5 * (met.maxt[idx] - met.mint[idx])
+    gs = np.fabs(met.psid[idx])**p.a9 / (p.a5 * met.rtot[idx] + trange)
+    pp = lai * met.nit[idx] / gs * p.a0 * np.exp(p.a7 * met.maxt[idx])
+    qq = p.a2 - p.a3
+    ci = 0.5 * (met.ca[idx] + qq - pp + np.sqrt((met.ca[idx] + qq - pp)**2.0 -\
+         4.0 * (met.ca[idx] * qq - pp * p.a2)))
+    e0 = p.a6 * lai**2 / (lai**2 + p.a8)
+    dec = -23.4 * np.cos((360.0 * (met.doy[idx]+ 10.0) / 365.0) * \
+            np.pi / 180.0) * np.pi / 180.0
+    m = np.tan(p.lat * np.pi / 180.0) * np.tan(dec)
+    if m >= 1.0:
+        dayl = 24.0
+    elif m <= -1.0:
+        dayl = 0.0
+    else:
+        dayl = 24.0 * np.arccos(-m) / np.pi
+    cps = e0 * met.rad[idx] * gs * (met.ca[idx] - ci) / \
+            (e0 * met.rad[idx] + gs * (met.ca[idx] - ci))
+    gpp = cps * (p.a1 * dayl + p.a4)
+
+    return gpp
+
 
 
 if __name__ == "__main__":
