@@ -59,9 +59,11 @@ def setup_holding_matrices_vectors(c):
 
     err_var = np.zeros(c.ndims)
     err_type = np.zeros(c.ndims)
+
+    # ensemble noise variance vector
     ens_var = np.zeros(c.ndims)
 
-    # model noise vector
+    # model noise matrix
     q = np.zeros((c.ndims, c.nrens))
 
     return A, err_var, err_type, ens_var, q
